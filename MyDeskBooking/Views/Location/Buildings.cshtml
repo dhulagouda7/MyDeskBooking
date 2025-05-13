@@ -1,0 +1,32 @@
+@model IEnumerable<BookMyDesk.Models.EntityModels.Building>
+@{
+    ViewBag.Title = "Browse Buildings";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Buildings at @ViewBag.LocationName</h2>
+        <a href="@Url.Action("Index")" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Locations
+        </a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
+        @foreach (var building in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@building.BuildingName</h5>
+                        <p class="card-text">
+                            Total Floors: @(building.Floors?.Count ?? 0)
+                        </p>
+                        <a href="@Url.Action("Floors", new { buildingId = building.BuildingId })" class="btn btn-primary">
+                            View Floors
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

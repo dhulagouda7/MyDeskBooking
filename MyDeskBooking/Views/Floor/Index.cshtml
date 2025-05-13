@@ -1,0 +1,102 @@
+@model IEnumerable<BookMyDesk.Models.EntityModels.Floor>
+@{
+    ViewBag.Title = "Manage Floors";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            @if (!string.IsNullOrEmpty(ViewBag.BuildingName))
+            {
+                @:Floors - @ViewBag.BuildingName
+            }
+            else
+            {
+                @:All Floors
+            }
+        </h2>
+        @if (User.IsInRole("Admin"))
+        {
+            <a href="@Url.Action("Create", new { buildingId = Request.QueryString["buildingId"] })" class="btn btn-primary">
+                Add New Floor
+            </a>
+        }
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            @using (Html.BeginForm("Index", "Floor", FormMethod.Get))
+            {
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Filter by Building</label>
+                        @Html.DropDownList("buildingId", ViewBag.Buildings as SelectList,
+                            "-- All Buildings --", new { @class = "form-select" })
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-secondary w-100">Filter</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Building</th>
+                            <th>Floor Number</th>
+                            <th>Total Desks</th>
+                            <th>Available Desks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var floor in Model)
+                        {
+                            <tr>
+                                <td>@floor.Building.BuildingName</td>
+                                <td>@floor.FloorNumber</td>
+                                <td>@(floor.Desks?.Count ?? 0)</td>
+                                <td>@(floor.Desks?.Count(d => d.Status == "Available" && !d.IsReserved) ?? 0)</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Details", new { id = floor.FloorId })" class="btn btn-sm btn-info">
+                                            Details
+                                        </a>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <a href="@Url.Action("Edit", new { id = floor.FloorId })" class="btn btn-sm btn-primary">
+                                                Edit
+                                            </a>
+                                            using (Html.BeginForm("Delete", "Floor", new { id = floor.FloorId }, FormMethod.Post, new { style = "display:inline;" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-danger"
+                                                        onclick="return confirm('Are you sure you want to delete this floor? This cannot be undone.')">
+                                                    Delete
+                                                </button>
+                                            }
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

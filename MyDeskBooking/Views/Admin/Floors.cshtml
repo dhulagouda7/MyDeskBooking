@@ -1,0 +1,144 @@
+@model BookMyDesk.Models.ViewModels.FloorManagementViewModel
+@{
+    ViewBag.Title = "Manage Floors";
+    var building = Model.AvailableBuildings.FirstOrDefault(b => b.BuildingId == Model.Floor?.BuildingId);
+}
+
+<div class="container mt-4">
+    <h2>Manage Floors - @(building?.BuildingName ?? "All Buildings")</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Add New Floor</h4>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AddFloor", "Admin", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Building</label>
+                            @Html.DropDownListFor(m => m.Floor.BuildingId, 
+                                new SelectList(Model.AvailableBuildings, "BuildingId", "BuildingName"),
+                                "Select Building", new { @class = "form-select", required = "required" })
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Floor Number</label>
+                            @Html.TextBoxFor(m => m.Floor.FloorNumber, new { @class = "form-control", type = "number", required = "required" })
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Floor</button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>Existing Floors</h4>
+                        <div>
+                            @using (Html.BeginForm("Floors", "Admin", FormMethod.Get))
+                            {
+                                @Html.DropDownList("buildingId", 
+                                    new SelectList(Model.AvailableBuildings, "BuildingId", "BuildingName", Model.Floor?.BuildingId),
+                                    "All Buildings", new { @class = "form-select", onchange = "this.form.submit()" })
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Building</th>
+                                    <th>Floor Number</th>
+                                    <th>Total Desks</th>
+                                    <th>Available Desks</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var floor in Model.Floors)
+                                {
+                                    <tr>
+                                        <td>@floor.Building.BuildingName</td>
+                                        <td>@floor.FloorNumber</td>
+                                        <td>@(floor.Desks?.Count ?? 0)</td>
+                                        <td>@(floor.Desks?.Count(d => d.Status == "Available" && !d.IsReserved) ?? 0)</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-primary" onclick="editFloor(@floor.FloorId)">Edit</button>
+                                                <a href="@Url.Action("Desks", new { floorId = floor.FloorId })" class="btn btn-sm btn-info">Manage Desks</a>
+                                                @using (Html.BeginForm("DeleteFloor", "Admin", FormMethod.Post, new { style = "display: inline;" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="floorId" value="@floor.FloorId" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                            onclick="return confirm('Are you sure you want to delete this floor? This will also delete all desks on this floor.')">
+                                                        Delete
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Floor Modal -->
+<div class="modal fade" id="editFloorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Floor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editFloorForm" method="post">
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="editFloorId" name="FloorId" />
+                    <div class="mb-3">
+                        <label class="form-label">Building</label>
+                        <select id="editBuildingId" name="BuildingId" class="form-select" required>
+                            @foreach (var building in Model.AvailableBuildings)
+                            {
+                                <option value="@building.BuildingId">@building.BuildingName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Floor Number</label>
+                        <input type="number" id="editFloorNumber" name="FloorNumber" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editFloor(floorId) {
+            $.get('@Url.Action("GetFloor", "Admin")/' + floorId, function(data) {
+                $('#editFloorId').val(data.floorId);
+                $('#editBuildingId').val(data.buildingId);
+                $('#editFloorNumber').val(data.floorNumber);
+                $('#editFloorForm').attr('action', '@Url.Action("EditFloor", "Admin")');
+                $('#editFloorModal').modal('show');
+            });
+        }
+    </script>
+}

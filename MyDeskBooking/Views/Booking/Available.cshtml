@@ -1,0 +1,131 @@
+@model IEnumerable<BookMyDesk.Models.EntityModels.Desk>
+@{
+    ViewBag.Title = "Available Desks";
+    var selectedDate = Request.QueryString["date"] ?? DateTime.Today.ToString("yyyy-MM-dd");
+    var selectedStartTime = Request.QueryString["startTime"] ?? "09:00";
+    var selectedEndTime = Request.QueryString["endTime"] ?? "17:00";
+}
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Book a Desk</h4>
+            </div>
+            <div class="card-body">
+                <form method="get" class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" 
+                                   value="@selectedDate" 
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Start Time</label>
+                            <input type="time" name="startTime" class="form-control" 
+                                   value="@selectedStartTime" 
+                                   min="09:00" max="17:00" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">End Time</label>
+                            <input type="time" name="endTime" class="form-control" 
+                                   value="@selectedEndTime" 
+                                   min="09:00" max="17:00" required />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                @if (Model != null && Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Desk Number</th>
+                                    <th>Floor</th>
+                                    <th>Building</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var desk in Model)
+                                {
+                                    <tr>
+                                        <td>@desk.DeskNumber</td>
+                                        <td>Floor @desk.Floor.FloorNumber</td>
+                                        <td>@desk.Floor.Building.BuildingName</td>
+                                        <td>
+                                            <span class="badge bg-success">Available</span>
+                                        </td>
+                                        <td>
+                                            @using (Html.BeginForm("Create", "Booking", FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="deskId" value="@desk.DeskId" />
+                                                <input type="hidden" name="date" value="@selectedDate" />
+                                                <input type="hidden" name="startTime" value="@selectedStartTime" />
+                                                <input type="hidden" name="endTime" value="@selectedEndTime" />
+                                                <button type="submit" class="btn btn-primary btn-sm">Book Desk</button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <p>No desks are available for the selected time period.</p>
+                        <p>Try searching for a different date or time.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Set default date if not provided
+        document.addEventListener('DOMContentLoaded', function() {
+            var dateInput = document.querySelector('input[type="date"]');
+            if (!dateInput.value) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+
+            var startTimeInput = document.querySelector('input[name="startTime"]');
+            var endTimeInput = document.querySelector('input[name="endTime"]');
+
+            // Set default times if not provided
+            if (!startTimeInput.value) {
+                startTimeInput.value = '09:00';
+            }
+            if (!endTimeInput.value) {
+                endTimeInput.value = '17:00';
+            }
+
+            // Validate time range
+            startTimeInput.addEventListener('change', function() {
+                if (endTimeInput.value && this.value >= endTimeInput.value) {
+                    alert('Start time must be before end time');
+                    this.value = '09:00';
+                }
+            });
+
+            endTimeInput.addEventListener('change', function() {
+                if (startTimeInput.value && this.value <= startTimeInput.value) {
+                    alert('End time must be after start time');
+                    this.value = '17:00';
+                }
+            });
+        });
+    </script>
+}

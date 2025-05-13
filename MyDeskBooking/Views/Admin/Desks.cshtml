@@ -1,0 +1,232 @@
+@model BookMyDesk.Models.ViewModels.DeskManagementViewModel
+@{
+    ViewBag.Title = "Manage Desks";
+    var floor = Model.AvailableFloors.FirstOrDefault(f => f.FloorId == Model.Desk?.FloorId);
+}
+
+<div class="container mt-4">
+    <h2>Manage Desks - Floor @(floor?.FloorNumber ?? "All"), @(floor?.Building.BuildingName ?? "All Buildings")</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Add New Desk</h4>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AddDesk", "Admin", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Floor</label>
+                            @Html.DropDownListFor(m => m.Desk.FloorId, 
+                                new SelectList(Model.AvailableFloors.Select(f => 
+                                    new { 
+                                        f.FloorId, 
+                                        DisplayName = $"Floor {f.FloorNumber}, {f.Building.BuildingName}"
+                                    }), "FloorId", "DisplayName"),
+                                "Select Floor", new { @class = "form-select", required = "required" })
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Desk Number</label>
+                            @Html.TextBoxFor(m => m.Desk.DeskNumber, new { @class = "form-control", required = "required", maxlength = "20" })
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            @Html.DropDownListFor(m => m.Desk.Status,
+                                new SelectList(new[] { "Available", "Maintenance", "Reserved" }),
+                                new { @class = "form-select", required = "required" })
+                        </div>
+                        <div class="mb-3 form-check">
+                            @Html.CheckBoxFor(m => m.Desk.IsReserved, new { @class = "form-check-input" })
+                            <label class="form-check-label">Permanently Reserved</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Desk</button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>Existing Desks</h4>
+                        <div class="d-flex gap-2">
+                            @using (Html.BeginForm("Desks", "Admin", FormMethod.Get))
+                            {
+                                <select name="floorId" class="form-select" onchange="this.form.submit()">
+                                    <option value="">All Floors</option>
+                                    @foreach (var f in Model.AvailableFloors)
+                                    {
+                                        <option value="@f.FloorId" selected="@(f.FloorId == Model.Desk?.FloorId)">
+                                            Floor @f.FloorNumber, @f.Building.BuildingName
+                                        </option>
+                                    }
+                                </select>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Desk Number</th>
+                                    <th>Floor</th>
+                                    <th>Building</th>
+                                    <th>Status</th>
+                                    <th>Reserved</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var desk in Model.Desks)
+                                {
+                                    <tr>
+                                        <td>@desk.DeskNumber</td>
+                                        <td>Floor @desk.Floor.FloorNumber</td>
+                                        <td>@desk.Floor.Building.BuildingName</td>
+                                        <td>
+                                            <span class="badge bg-@(desk.Status switch {
+                                                "Available" => "success",
+                                                "Maintenance" => "warning",
+                                                "Reserved" => "info",
+                                                _ => "secondary"
+                                            })">@desk.Status</span>
+                                        </td>
+                                        <td>
+                                            @if (desk.IsReserved)
+                                            {
+                                                <span class="badge bg-danger">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">No</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-primary" onclick="editDesk(@desk.DeskId)">Edit</button>
+                                                <button class="btn btn-sm btn-success" onclick="changeStatus(@desk.DeskId)">Change Status</button>
+                                                @using (Html.BeginForm("DeleteDesk", "Admin", FormMethod.Post, new { style = "display: inline;" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="deskId" value="@desk.DeskId" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                            onclick="return confirm('Are you sure you want to delete this desk?')">
+                                                        Delete
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Desk Modal -->
+<div class="modal fade" id="editDeskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Desk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editDeskForm" method="post">
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="editDeskId" name="DeskId" />
+                    <div class="mb-3">
+                        <label class="form-label">Floor</label>
+                        <select id="editFloorId" name="FloorId" class="form-select" required>
+                            @foreach (var floor in Model.AvailableFloors)
+                            {
+                                <option value="@floor.FloorId">Floor @floor.FloorNumber, @floor.Building.BuildingName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Desk Number</label>
+                        <input type="text" id="editDeskNumber" name="DeskNumber" class="form-control" required maxlength="20" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select id="editStatus" name="Status" class="form-select" required>
+                            <option value="Available">Available</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Reserved">Reserved</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" id="editIsReserved" name="IsReserved" class="form-check-input" />
+                        <label class="form-check-label">Permanently Reserved</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Change Status Modal -->
+<div class="modal fade" id="changeStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Desk Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="changeStatusForm" method="post">
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="statusDeskId" name="DeskId" />
+                    <div class="mb-3">
+                        <label class="form-label">New Status</label>
+                        <select id="newStatus" name="Status" class="form-select" required>
+                            <option value="Available">Available</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Reserved">Reserved</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editDesk(deskId) {
+            $.get('@Url.Action("GetDesk", "Admin")/' + deskId, function(data) {
+                $('#editDeskId').val(data.deskId);
+                $('#editFloorId').val(data.floorId);
+                $('#editDeskNumber').val(data.deskNumber);
+                $('#editStatus').val(data.status);
+                $('#editIsReserved').prop('checked', data.isReserved);
+                $('#editDeskForm').attr('action', '@Url.Action("EditDesk", "Admin")');
+                $('#editDeskModal').modal('show');
+            });
+        }
+
+        function changeStatus(deskId) {
+            $('#statusDeskId').val(deskId);
+            $('#changeStatusForm').attr('action', '@Url.Action("ChangeDeskStatus", "Admin")');
+            $('#changeStatusModal').modal('show');
+        }
+    </script>
+}

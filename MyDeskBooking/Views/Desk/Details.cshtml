@@ -1,0 +1,107 @@
+@model BookMyDesk.Models.EntityModels.Desk
+@{
+    ViewBag.Title = "Desk Details";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2>Desk Details</h2>
+                        <div>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a href="@Url.Action("Edit", new { id = Model.DeskId })" class="btn btn-primary me-2">Edit</a>
+                            }
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Desk Number:</strong></div>
+                        <div class="col-sm-8">@Model.DeskNumber</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Floor:</strong></div>
+                        <div class="col-sm-8">Floor @Model.Floor.FloorNumber</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Building:</strong></div>
+                        <div class="col-sm-8">@Model.Floor.Building.BuildingName</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Location:</strong></div>
+                        <div class="col-sm-8">@Model.Floor.Building.Location.LocationName</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Status:</strong></div>
+                        <div class="col-sm-8">
+                            <span class="badge bg-@(Model.Status switch {
+                                "Available" => "success",
+                                "Maintenance" => "warning",
+                                "Reserved" => "info",
+                                _ => "secondary"
+                            })">@Model.Status</span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Permanently Reserved:</strong></div>
+                        <div class="col-sm-8">
+                            @if (Model.IsReserved)
+                            {
+                                <span class="badge bg-danger">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">No</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (ViewBag.ActiveBookings != null && ViewBag.ActiveBookings.Any())
+            {
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h4>Active Bookings</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>User</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in ViewBag.ActiveBookings)
+                                    {
+                                        <tr>
+                                            <td>@booking.BookingDate.ToShortDateString()</td>
+                                            <td>@booking.StartTime.ToString(@"hh\:mm") - @booking.EndTime.ToString(@"hh\:mm")</td>
+                                            <td>@booking.User.Username</td>
+                                            <td>
+                                                <span class="badge bg-@(booking.Status switch {
+                                                    "Pending" => "warning",
+                                                    "CheckedIn" => "success",
+                                                    _ => "secondary"
+                                                })">@booking.Status</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

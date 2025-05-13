@@ -1,0 +1,133 @@
+@model BookMyDesk.Models.ViewModels.BuildingManagementViewModel
+@{
+    ViewBag.Title = "Manage Buildings";
+}
+
+<div class="container mt-4">
+    <h2>Manage Buildings</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Add New Building</h4>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AddBuilding", "Admin", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            @Html.DropDownListFor(m => m.Building.LocationId, 
+                                new SelectList(Model.AvailableLocations, "LocationId", "LocationName"),
+                                "Select Location", new { @class = "form-select", required = "required" })
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Building Name</label>
+                            @Html.TextBoxFor(m => m.Building.BuildingName, new { @class = "form-control", required = "required", maxlength = "100" })
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Building</button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Existing Buildings</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Building Name</th>
+                                    <th>Location</th>
+                                    <th>Total Floors</th>
+                                    <th>Total Desks</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var building in Model.Buildings)
+                                {
+                                    <tr>
+                                        <td>@building.BuildingName</td>
+                                        <td>@building.Location.LocationName</td>
+                                        <td>@(building.Floors?.Count ?? 0)</td>
+                                        <td>@(building.Floors?.Sum(f => f.Desks?.Count ?? 0) ?? 0)</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-primary" onclick="editBuilding(@building.BuildingId)">Edit</button>
+                                                <a href="@Url.Action("Floors", new { buildingId = building.BuildingId })" class="btn btn-sm btn-info">Manage Floors</a>
+                                                @using (Html.BeginForm("DeleteBuilding", "Admin", FormMethod.Post, new { style = "display: inline;" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="buildingId" value="@building.BuildingId" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                            onclick="return confirm('Are you sure you want to delete this building? This will also delete all associated floors and desks.')">
+                                                        Delete
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Building Modal -->
+<div class="modal fade" id="editBuildingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Building</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editBuildingForm" method="post">
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="editBuildingId" name="BuildingId" />
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <select id="editLocationId" name="LocationId" class="form-select" required>
+                            @foreach (var location in Model.AvailableLocations)
+                            {
+                                <option value="@location.LocationId">@location.LocationName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Building Name</label>
+                        <input type="text" id="editBuildingName" name="BuildingName" class="form-control" required maxlength="100" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editBuilding(buildingId) {
+            $.get('@Url.Action("GetBuilding", "Admin")/' + buildingId, function(data) {
+                $('#editBuildingId').val(data.buildingId);
+                $('#editLocationId').val(data.locationId);
+                $('#editBuildingName').val(data.buildingName);
+                $('#editBuildingForm').attr('action', '@Url.Action("EditBuilding", "Admin")');
+                $('#editBuildingModal').modal('show');
+            });
+        }
+    </script>
+}

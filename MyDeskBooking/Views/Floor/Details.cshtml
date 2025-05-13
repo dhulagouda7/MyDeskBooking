@@ -1,0 +1,101 @@
+@model BookMyDesk.Models.EntityModels.Floor
+@{
+    ViewBag.Title = "Floor Details";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>Floor Details</h4>
+                        <div>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a href="@Url.Action("Edit", new { id = Model.FloorId })" class="btn btn-primary">
+                                    Edit Floor
+                                </a>
+                            }
+                            <a href="@Url.Action("Index", new { buildingId = Model.BuildingId })" class="btn btn-secondary">
+                                Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Building Information</h5>
+                            <dl class="row">
+                                <dt class="col-sm-4">Building Name:</dt>
+                                <dd class="col-sm-8">@Model.Building.BuildingName</dd>
+
+                                <dt class="col-sm-4">Floor Number:</dt>
+                                <dd class="col-sm-8">@Model.FloorNumber</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Desk Information</h5>
+                            <dl class="row">
+                                <dt class="col-sm-6">Total Desks:</dt>
+                                <dd class="col-sm-6">@(Model.Desks?.Count ?? 0)</dd>
+
+                                <dt class="col-sm-6">Available Desks:</dt>
+                                <dd class="col-sm-6">@(Model.Desks?.Count(d => d.Status == "Available" && !d.IsReserved) ?? 0)</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    @if (Model.Desks != null && Model.Desks.Any())
+                    {
+                        <div class="table-responsive">
+                            <h5>Desk List</h5>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Desk Number</th>
+                                        <th>Status</th>
+                                        <th>Reserved</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var desk in Model.Desks.OrderBy(d => d.DeskNumber))
+                                    {
+                                        <tr>
+                                            <td>@desk.DeskNumber</td>
+                                            <td>
+                                                <span class="badge bg-@(desk.Status switch {
+                                                    "Available" => "success",
+                                                    "Maintenance" => "warning",
+                                                    "Reserved" => "info",
+                                                    _ => "secondary"
+                                                })">@desk.Status</span>
+                                            </td>
+                                            <td>
+                                                @if (desk.IsReserved)
+                                                {
+                                                    <span class="badge bg-danger">Yes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">No</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            No desks have been added to this floor yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+        <div class="container">
+            @Html.ActionLink("My Desk Booking", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
+                <ul class="navbar-nav flex-grow-1">
+                    @if (Request.IsAuthenticated)
+                    {
+                        var roles = System.Web.Security.Roles.GetRolesForUser(User.Identity.Name);
+                        var isAdmin = roles.Contains("Admin");
+
+                        <li class="nav-item">@Html.ActionLink("Dashboard", "Index", "Dashboard", new { area = "" }, new { @class = "nav-link" })</li>
+                        <li class="nav-item">@Html.ActionLink("My Bookings", "Index", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
+                        <li class="nav-item">@Html.ActionLink("Available Desks", "Available", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
+
+                        if (isAdmin)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                                    Admin
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>@Html.ActionLink("Dashboard", "Index", "Admin", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>@Html.ActionLink("Locations", "Index", "Location", new { area = "" }, new { @class = "dropdown-item" })</li>                                    <li>@Html.ActionLink("Buildings", "Buildings", "Admin", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                    <li>@Html.ActionLink("Floors", "Index", "Floor", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                    <li>@Html.ActionLink("Desks", "Index", "Desk", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                </ul>
+                            </li>
+                        }
+                    }
+                </ul>
+
+                <ul class="navbar-nav">
+                    @if (Request.IsAuthenticated)
+                    {
+                        <li>@Html.ActionLink("About", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+
+
+                        <li class="nav-item">
+                            <span class="nav-link">Hello, @User.Identity.Name!</span>
+                        </li>
+                        <li class="nav-item">
+                            @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "form-inline" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <a href="javascript:document.getElementById('logoutForm').submit()" class="nav-link">Log off</a>
+                            }
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">@Html.ActionLink("Log in", "Login", "Account", new { area = "" }, new { @class = "nav-link" })</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+    @System.Web.Optimization.Scripts.Render("~/bundles/jquery")
+    @System.Web.Optimization.Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/bootstrap.bundle.js"></script>
+    @RenderSection("scripts", required: false)
+
+    <style>
+        .nav-item {
+            margin-right: 0.5rem;
+        }
+
+            .nav-item .dropdown-menu {
+                margin-top: 0;
+                background-color: #343a40;
+                border-color: #454d55;
+            }
+
+            .nav-item .dropdown-item {
+                padding: 0.5rem 1rem;
+                color: rgba(255,255,255,.55);
+            }
+
+                .nav-item .dropdown-item:hover,
+                .nav-item .dropdown-item:focus {
+                    color: rgba(255,255,255,.75);
+                    background-color: #454d55;
+                }
+
+        .dropdown-divider {
+            border-top-color: #454d55;
+        }
+
+        .navbar .nav-link {
+            color: rgba(255,255,255,.55) !important;
+        }
+
+            .navbar .nav-link:hover,
+            .navbar .nav-link:focus {
+                color: rgba(255,255,255,.75) !important;
+            }
+
+            .navbar .nav-link.dropdown-toggle::after {
+                border-top-color: rgba(255,255,255,.55);
+            }
+    </style>
+</body>
+</html>

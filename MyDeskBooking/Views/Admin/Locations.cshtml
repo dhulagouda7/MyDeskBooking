@@ -1,0 +1,81 @@
+@model BookMyDesk.Models.ViewModels.LocationManagementViewModel
+@{
+    ViewBag.Title = "Manage Locations";
+}
+
+<div class="container mt-4">
+    <h2>Manage Locations</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Add New Location</h4>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AddLocation", "Admin", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Location Name</label>
+                            @Html.TextBoxFor(m => m.Location.LocationName, new { @class = "form-control", required = "required" })
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            @Html.TextAreaFor(m => m.Location.Address, new { @class = "form-control", required = "required" })
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Location</button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Existing Locations</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Location Name</th>
+                                    <th>Address</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var location in Model.Locations)
+                                {
+                                    <tr>
+                                        <td>@location.LocationName</td>
+                                        <td>@location.Address</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" onclick="editLocation(@location.LocationId)">Edit</button>
+                                            @using (Html.BeginForm("DeleteLocation", "Admin", FormMethod.Post, new { style = "display: inline;" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="locationId" value="@location.LocationId" />
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this location?')">Delete</button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editLocation(locationId) {
+            // Implement edit functionality using modal or redirect
+            window.location.href = '@Url.Action("EditLocation", "Admin")/' + locationId;
+        }
+    </script>
+}

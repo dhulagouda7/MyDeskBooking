@@ -1,0 +1,100 @@
+@model BookMyDesk.Models.ViewModels.DashboardViewModel
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h2>My Dashboard</h2>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>My Current Bookings</h4>
+            </div>
+            <div class="card-body">
+                @if (Model.CurrentBookings != null && Model.CurrentBookings.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var booking in Model.CurrentBookings)
+                        {
+                            <div class="list-group-item">
+                                <h5 class="mb-1">Desk @booking.Desk.DeskNumber</h5>
+                                <p class="mb-1">
+                                    Date: @booking.BookingDate.ToShortDateString()<br />
+                                    Time: @booking.StartTime.ToString(@"hh\:mm") - @booking.EndTime.ToString(@"hh\:mm")
+                                </p>
+                                <p class="mb-1">Status: @booking.Status</p>
+                                @if (booking.Status == "Pending")
+                                {
+                                    using (Html.BeginForm("CheckIn", "Booking", FormMethod.Post, new { style = "display: inline;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                        <button type="submit" class="btn btn-success btn-sm">Check In</button>
+                                    }
+                                }
+                                else if (booking.Status == "CheckedIn")
+                                {
+                                    using (Html.BeginForm("CheckOut", "Booking", FormMethod.Post, new { style = "display: inline;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                        <button type="submit" class="btn btn-warning btn-sm">Check Out</button>
+                                    }
+                                }
+                                @if (booking.Status == "Pending")
+                                {
+                                    using (Html.BeginForm("Cancel", "Booking", FormMethod.Post, new { style = "display: inline;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                        <button type="submit" class="btn btn-danger btn-sm ms-2">Cancel</button>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p>You have no current bookings.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Available Desks Today</h4>
+            </div>
+            <div class="card-body">
+                @if (Model.AvailableDesks != null && Model.AvailableDesks.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var desk in Model.AvailableDesks)
+                        {
+                            <div class="list-group-item">
+                                <h5 class="mb-1">Desk @desk.DeskNumber</h5>
+                                <p class="mb-1">
+                                    Location: @desk.Floor.Building.Location.LocationName<br />
+                                    Building: @desk.Floor.Building.BuildingName<br />
+                                    Floor: @desk.Floor.FloorNumber
+                                </p>
+                                <a href="@Url.Action("Available", "Booking")" class="btn btn-primary btn-sm">Book Now</a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p>No desks are available for today.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
