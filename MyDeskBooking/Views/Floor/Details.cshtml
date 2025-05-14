@@ -64,14 +64,7 @@
                                     {
                                         <tr>
                                             <td>@desk.DeskNumber</td>
-                                            <td>
-                                                <span class="badge bg-@(desk.Status switch {
-                                                    "Available" => "success",
-                                                    "Maintenance" => "warning",
-                                                    "Reserved" => "info",
-                                                    _ => "secondary"
-                                                })">@desk.Status</span>
-                                            </td>
+                                            <td>@desk.Status</td>
                                             <td>
                                                 @if (desk.IsReserved)
                                                 {

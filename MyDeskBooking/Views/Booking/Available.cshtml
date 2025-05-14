@@ -4,6 +4,9 @@
     var selectedDate = Request.QueryString["date"] ?? DateTime.Today.ToString("yyyy-MM-dd");
     var selectedStartTime = Request.QueryString["startTime"] ?? "09:00";
     var selectedEndTime = Request.QueryString["endTime"] ?? "17:00";
+    var selectedLocationId = Request.QueryString["locationId"];
+    var selectedBuildingId = Request.QueryString["buildingId"];
+    var selectedFloorId = Request.QueryString["floorId"];
 }
 
 <div class="row mt-4">
@@ -15,7 +18,47 @@
             <div class="card-body">
                 <form method="get" class="mb-4">
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label">Location</label>
+                            <select name="locationId" id="locationSelect" class="form-select">
+                                <option value="">All Locations</option>
+                                @foreach (var location in ViewBag.Locations ?? Enumerable.Empty<dynamic>())
+                                {
+                                    <option value="@location.LocationId" @(selectedLocationId == location.LocationId.ToString() ? "selected" : "")>
+                                        @location.LocationName
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Building</label>
+                            <select name="buildingId" id="buildingSelect" class="form-select">
+                                <option value="">All Buildings</option>
+                                @foreach (var building in ViewBag.Buildings ?? Enumerable.Empty<dynamic>())
+                                {
+                                    <option value="@building.BuildingId" 
+                                            data-location="@building.LocationId"
+                                            @(selectedBuildingId == building.BuildingId.ToString() ? "selected" : "")>
+                                        @building.BuildingName
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Floor</label>
+                            <select name="floorId" id="floorSelect" class="form-select">
+                                <option value="">All Floors</option>
+                                @foreach (var floor in ViewBag.Floors ?? Enumerable.Empty<dynamic>())
+                                {
+                                    <option value="@floor.FloorId" 
+                                            data-building="@floor.BuildingId"
+                                            @(selectedFloorId == floor.FloorId.ToString() ? "selected" : "")>
+                                        Floor @floor.FloorNumber
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Date</label>
                             <input type="date" name="date" class="form-control" 
                                    value="@selectedDate" 
@@ -45,10 +88,10 @@
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
-                                <tr>
-                                    <th>Desk Number</th>
+                                <tr>                                    <th>Desk Number</th>
                                     <th>Floor</th>
                                     <th>Building</th>
+                                    <th>Location</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -60,6 +103,7 @@
                                         <td>@desk.DeskNumber</td>
                                         <td>Floor @desk.Floor.FloorNumber</td>
                                         <td>@desk.Floor.Building.BuildingName</td>
+                                        <td>@desk.Floor.Building.Location.LocationName</td>
                                         <td>
                                             <span class="badge bg-success">Available</span>
                                         </td>
@@ -94,8 +138,47 @@
 
 @section Scripts {
     <script>
-        // Set default date if not provided
+        function updateFilters() {
+            const locationId = document.getElementById('locationSelect').value;
+            const buildingId = document.getElementById('buildingSelect').value;
+            
+            // Update building options
+            const buildings = document.querySelectorAll('#buildingSelect option:not(:first-child)');
+            buildings.forEach(option => {
+                if (!locationId || option.dataset.location === locationId) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+
+            // Update floor options
+            const floors = document.querySelectorAll('#floorSelect option:not(:first-child)');
+            floors.forEach(option => {
+                if (!buildingId || option.dataset.building === buildingId) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+
+            // Reset child dropdowns when parent selection changes
+            if (locationId === '') {
+                document.getElementById('buildingSelect').value = '';
+                document.getElementById('floorSelect').value = '';
+            }
+            if (buildingId === '') {
+                document.getElementById('floorSelect').value = '';
+            }
+        }
+
+        // Set up event listeners for cascading dropdowns
         document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('locationSelect').addEventListener('change', updateFilters);
+            document.getElementById('buildingSelect').addEventListener('change', updateFilters);
+            updateFilters();
+
+            // Set default date if not provided
             var dateInput = document.querySelector('input[type="date"]');
             if (!dateInput.value) {
                 dateInput.value = new Date().toISOString().split('T')[0];

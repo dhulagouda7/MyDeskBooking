@@ -57,8 +57,7 @@
                                         <td>@building.Location.LocationName</td>
                                         <td>@(building.Floors?.Count ?? 0)</td>
                                         <td>@(building.Floors?.Sum(f => f.Desks?.Count ?? 0) ?? 0)</td>
-                                        <td>
-                                            <div class="btn-group">
+                                        <td>                                            <div class="d-flex gap-2">
                                                 <button class="btn btn-sm btn-primary" onclick="editBuilding(@building.BuildingId)">Edit</button>
                                                 <a href="@Url.Action("Floors", new { buildingId = building.BuildingId })" class="btn btn-sm btn-info">Manage Floors</a>
                                                 @using (Html.BeginForm("DeleteBuilding", "Admin", FormMethod.Post, new { style = "display: inline;" }))

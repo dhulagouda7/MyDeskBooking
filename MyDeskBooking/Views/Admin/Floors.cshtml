@@ -1,11 +1,11 @@
 @model BookMyDesk.Models.ViewModels.FloorManagementViewModel
 @{
     ViewBag.Title = "Manage Floors";
-    var building = Model.AvailableBuildings.FirstOrDefault(b => b.BuildingId == Model.Floor?.BuildingId);
+    var selectedBuilding = Model.AvailableBuildings.FirstOrDefault(b => b.BuildingId == Model.Floor?.BuildingId);
 }
 
 <div class="container mt-4">
-    <h2>Manage Floors - @(building?.BuildingName ?? "All Buildings")</h2>
+    <h2>Manage Floors - @(selectedBuilding?.BuildingName ?? "All Buildings")</h2>
 
     <div class="row mt-4">
         <div class="col-md-4">
@@ -68,8 +68,7 @@
                                         <td>@floor.FloorNumber</td>
                                         <td>@(floor.Desks?.Count ?? 0)</td>
                                         <td>@(floor.Desks?.Count(d => d.Status == "Available" && !d.IsReserved) ?? 0)</td>
-                                        <td>
-                                            <div class="btn-group">
+                                        <td>                                            <div class="d-flex gap-2">
                                                 <button class="btn btn-sm btn-primary" onclick="editFloor(@floor.FloorId)">Edit</button>
                                                 <a href="@Url.Action("Desks", new { floorId = floor.FloorId })" class="btn btn-sm btn-info">Manage Desks</a>
                                                 @using (Html.BeginForm("DeleteFloor", "Admin", FormMethod.Post, new { style = "display: inline;" }))

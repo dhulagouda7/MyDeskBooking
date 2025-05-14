@@ -107,17 +107,22 @@ namespace BookMyDesk.Controllers
             return View(buildings);
         }
 
-        public async Task<ActionResult> Floors(int buildingId)
+        public async Task<ActionResult> Floors(int? buildingId)
         {
-            var floors = (await _floorRepository.GetAllAsync())
-                .Where(f => f.BuildingId == buildingId)
-                .OrderBy(f => f.FloorNumber);
-            var building = await _buildingRepository.GetByIdAsync(buildingId);
+            var floors = (await _floorRepository.GetAllAsync());
+            if (buildingId.HasValue)
+            {
+                floors = floors.Where(f => f.BuildingId == buildingId.Value);
+                var building = await _buildingRepository.GetByIdAsync(buildingId.Value);
+                if (building != null)
+                {
+                    ViewBag.BuildingName = building.BuildingName;
+                    ViewBag.BuildingId = buildingId.Value;
+                    ViewBag.LocationId = building.LocationId;
+                }
+            }
             
-            ViewBag.BuildingName = building.BuildingName;
-            ViewBag.BuildingId = buildingId;
-            ViewBag.LocationId = building.LocationId;
-            return View(floors);
+            return View(floors.OrderBy(f => f.FloorNumber));
         }
     }
 }

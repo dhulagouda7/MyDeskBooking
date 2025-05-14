@@ -1,11 +1,11 @@
 @model BookMyDesk.Models.ViewModels.DeskManagementViewModel
 @{
     ViewBag.Title = "Manage Desks";
-    var floor = Model.AvailableFloors.FirstOrDefault(f => f.FloorId == Model.Desk?.FloorId);
+    var selectedFloor = Model.AvailableFloors.FirstOrDefault(f => f.FloorId == Model.Desk?.FloorId);
 }
 
 <div class="container mt-4">
-    <h2>Manage Desks - Floor @(floor?.FloorNumber ?? "All"), @(floor?.Building.BuildingName ?? "All Buildings")</h2>
+    <h2>Manage Desks - Floor @(selectedFloor != null ? selectedFloor.FloorNumber.ToString() : "All"), @(selectedFloor?.Building.BuildingName ?? "All Buildings")</h2>
 
     <div class="row mt-4">
         <div class="col-md-4">
@@ -88,14 +88,7 @@
                                         <td>@desk.DeskNumber</td>
                                         <td>Floor @desk.Floor.FloorNumber</td>
                                         <td>@desk.Floor.Building.BuildingName</td>
-                                        <td>
-                                            <span class="badge bg-@(desk.Status switch {
-                                                "Available" => "success",
-                                                "Maintenance" => "warning",
-                                                "Reserved" => "info",
-                                                _ => "secondary"
-                                            })">@desk.Status</span>
-                                        </td>
+                                        <td>@desk.Status</td>
                                         <td>
                                             @if (desk.IsReserved)
                                             {
@@ -105,9 +98,8 @@
                                             {
                                                 <span class="badge bg-success">No</span>
                                             }
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
+                                        </td>                                        <td>
+                                            <div class="d-flex gap-2">
                                                 <button class="btn btn-sm btn-primary" onclick="editDesk(@desk.DeskId)">Edit</button>
                                                 <button class="btn btn-sm btn-success" onclick="changeStatus(@desk.DeskId)">Change Status</button>
                                                 @using (Html.BeginForm("DeleteDesk", "Admin", FormMethod.Post, new { style = "display: inline;" }))

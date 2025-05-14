@@ -78,7 +78,7 @@
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <td>
-                                        <div class="btn-group">
+                                        <div class="btn-group d-flex gap-2">
                                             <a href="@Url.Action("Details", new { id = desk.DeskId })" class="btn btn-sm btn-info">Details</a>
                                             <a href="@Url.Action("Edit", new { id = desk.DeskId })" class="btn btn-sm btn-primary">Edit</a>
                                             <button class="btn btn-sm btn-success" onclick="changeStatus(@desk.DeskId)">Change Status</button>

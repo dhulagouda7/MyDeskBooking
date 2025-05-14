@@ -1,8 +1,11 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BookMyDesk.Models.ViewModels;
 using BookMyDesk.Services.BusinessLogic;
+using BookMyDesk.Services.DataAccess;
+using BookMyDesk.Models.EntityModels;
 
 namespace BookMyDesk.Controllers
 {
@@ -10,15 +13,17 @@ namespace BookMyDesk.Controllers
     public class DashboardController : Controller
     {
         private readonly IBookingService _bookingService;
+        private readonly IRepository<User> _userRepository;
 
-        public DashboardController(IBookingService bookingService)
+        public DashboardController(IBookingService bookingService, IRepository<User> userRepository)
         {
             _bookingService = bookingService;
+            _userRepository = userRepository;
         }
 
         public async Task<ActionResult> Index()
         {
-            var userId = GetCurrentUserId();
+            var userId = await GetCurrentUserId();
             var userBookings = await _bookingService.GetUserBookingsAsync(userId);
 
             var viewModel = new DashboardViewModel
@@ -34,11 +39,22 @@ namespace BookMyDesk.Controllers
             return View(viewModel);
         }
 
-        private int GetCurrentUserId()
+        private async Task<int> GetCurrentUserId()
         {
-            // In a real application, this would get the user ID from the authenticated user's claims
-            // For now, we'll return a dummy user ID
-            return 1;
+            var username = User.Identity.Name;
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new InvalidOperationException("User is not authenticated");
+            }
+
+            var users = await _userRepository.GetAllAsync();
+            var user = users.FirstOrDefault(u => u.Username == username);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found");
+            }
+
+            return user.UserId;
         }
     }
 }
