@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BookMyDesk.Models.EntityModels;
-using BookMyDesk.Services.DataAccess;
+using MyDeskBooking.Models.EntityModels;
+using MyDeskBooking.Services.DataAccess;
 
-namespace BookMyDesk.Services.BusinessLogic
+namespace MyDeskBooking.Services.BusinessLogic
 {
     public interface IBookingService
     {

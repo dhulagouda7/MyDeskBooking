@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
-using BookMyDesk.DataAccess;
-using BookMyDesk.Models.EntityModels;
+using MyDeskBooking.DataAccess;
+using MyDeskBooking.Models.EntityModels;
 
-namespace BookMyDesk.Services.DataAccess
+namespace MyDeskBooking.Services.DataAccess
 {
     public interface IBookingRepository : IRepository<Booking>
     {

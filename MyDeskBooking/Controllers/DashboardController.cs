@@ -2,12 +2,12 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using BookMyDesk.Models.ViewModels;
-using BookMyDesk.Services.BusinessLogic;
-using BookMyDesk.Services.DataAccess;
-using BookMyDesk.Models.EntityModels;
+using MyDeskBooking.Models.ViewModels;
+using MyDeskBooking.Services.BusinessLogic;
+using MyDeskBooking.Services.DataAccess;
+using MyDeskBooking.Models.EntityModels;
 
-namespace BookMyDesk.Controllers
+namespace MyDeskBooking.Controllers
 {
     [Authorize]
     public class DashboardController : Controller

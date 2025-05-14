@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace BookMyDesk.Models.Validation
+namespace MyDeskBooking.Models.Validation
 {
     public class FutureDateAttribute : ValidationAttribute
     {

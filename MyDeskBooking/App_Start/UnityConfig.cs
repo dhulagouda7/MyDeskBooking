@@ -1,11 +1,10 @@
 using System;
 using System.Web.Mvc;
-using BookMyDesk.Controllers;
-using BookMyDesk.DataAccess;
-using BookMyDesk.Models.EntityModels;
-using BookMyDesk.Services.BusinessLogic;
-using BookMyDesk.Services.DataAccess;
 using MyDeskBooking.Controllers;
+using MyDeskBooking.DataAccess;
+using MyDeskBooking.Models.EntityModels;
+using MyDeskBooking.Services.BusinessLogic;
+using MyDeskBooking.Services.DataAccess;
 using Unity;
 using Unity.Injection;
 using Unity.Lifetime;

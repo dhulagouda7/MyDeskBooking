@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 using System.Web.Security;
-using BookMyDesk.DataAccess;
-using BookMyDesk.Models.EntityModels;
+using MyDeskBooking.DataAccess;
+using MyDeskBooking.Models.EntityModels;
 
 namespace MyDeskBooking.App_Start
 {public class MyDeskBookingRoleProvider : RoleProvider, IDisposable

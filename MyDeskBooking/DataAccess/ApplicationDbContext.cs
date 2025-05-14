@@ -1,7 +1,7 @@
 using System.Data.Entity;
-using BookMyDesk.Models.EntityModels;
+using MyDeskBooking.Models.EntityModels;
 
-namespace BookMyDesk.DataAccess
+namespace MyDeskBooking.DataAccess
 {
     public class ApplicationDbContext : DbContext
     {

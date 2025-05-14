@@ -1,4 +1,4 @@
-@model BookMyDesk.Models.ViewModels.DeskManagementViewModel
+@model MyDeskBooking.Models.ViewModels.DeskManagementViewModel
 @{
     ViewBag.Title = "Manage Desks";
     var selectedFloor = Model.AvailableFloors.FirstOrDefault(f => f.FloorId == Model.Desk?.FloorId);

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace BookMyDesk.Models.EntityModels
+namespace MyDeskBooking.Models.EntityModels
 {
     public class Floor
     {
