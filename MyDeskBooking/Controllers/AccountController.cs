@@ -26,13 +26,18 @@ namespace BookMyDesk.Controllers
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(string username, string password, string returnUrl)
-        {
-            // Fix: Await the task directly and use LINQ methods on the result
+        {            // Get user and validate status
             var users = await _userRepository.GetAllAsync();
             var user = users.FirstOrDefault(u => u.Username == username);
 
             if (user != null)
             {
+                if (!user.IsActive)
+                {
+                    ModelState.AddModelError("", "Your account has been deactivated. Please contact an administrator.");
+                    return View();
+                }
+
                 // Create the authentication ticket
                 string roleName = user.RoleId == 1 ? "Admin" : "User";
                 
