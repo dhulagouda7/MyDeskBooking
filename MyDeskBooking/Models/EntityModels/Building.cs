@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 
-namespace BookMyDesk.Models.EntityModels
+namespace MyDeskBooking.Models.EntityModels
 {
     public class Building
     {

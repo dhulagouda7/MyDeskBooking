@@ -2,8 +2,8 @@ using System;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web.Security;
-using BookMyDesk.Models.EntityModels;
-using BookMyDesk.Services.DataAccess;
+using MyDeskBooking.Models.EntityModels;
+using MyDeskBooking.Services.DataAccess;
 
 namespace MyDeskBooking.Controllers
 {

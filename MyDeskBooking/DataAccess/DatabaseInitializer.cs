@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using BookMyDesk.DataAccess;
-using BookMyDesk.Models.EntityModels;
+using MyDeskBooking.DataAccess;
+using MyDeskBooking.Models.EntityModels;
 
 namespace MyDeskBooking.DataAccess
 {

@@ -152,7 +152,6 @@
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\DeskController.cs" />
     <Compile Include="Controllers\FloorController.cs" />
-    <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LocationController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="DataAccess\ApplicationDbContext.cs" />
@@ -226,14 +225,10 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
-    <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Admin\Buildings.cshtml" />
     <Content Include="Views\Admin\Desks.cshtml" />
     <Content Include="Views\Admin\Floors.cshtml" />
-    <Content Include="Views\Admin\Index.cshtml" />
     <Content Include="Views\Admin\Locations.cshtml" />
     <Content Include="Views\Booking\Available.cshtml" />
     <Content Include="Views\Booking\Index.cshtml" />

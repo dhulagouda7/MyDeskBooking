@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BookMyDesk.Services.DataAccess
+namespace MyDeskBooking.Services.DataAccess
 {
     public interface IRepository<T> where T : class
     {

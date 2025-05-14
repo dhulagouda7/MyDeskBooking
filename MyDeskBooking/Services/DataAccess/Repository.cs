@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Linq;
-using BookMyDesk.DataAccess;
+using MyDeskBooking.DataAccess;
 
-namespace BookMyDesk.Services.DataAccess
+namespace MyDeskBooking.Services.DataAccess
 {
     public class Repository<T> : IRepository<T> where T : class
     {

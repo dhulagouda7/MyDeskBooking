@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Linq;
-using BookMyDesk.Models.EntityModels;
-using BookMyDesk.Services.DataAccess;
+using MyDeskBooking.Models.EntityModels;
+using MyDeskBooking.Services.DataAccess;
 
-namespace BookMyDesk.Controllers
+namespace MyDeskBooking.Controllers
 {
     [Authorize]
     public class LocationController : Controller

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using BookMyDesk.Models.EntityModels;
+using MyDeskBooking.Models.EntityModels;
 
-namespace BookMyDesk.Models.ViewModels
+namespace MyDeskBooking.Models.ViewModels
 {
     public class DashboardViewModel
     {
