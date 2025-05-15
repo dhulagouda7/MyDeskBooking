@@ -31,10 +31,9 @@ MyDeskBooking is a web-based application that enables organizations to efficient
 1. Clone the repository
 2. Open MyDeskBooking.sln in Visual Studio
 3. Restore NuGet packages
-4. Update the connection string in Web.config
-5. Run Entity Framework migrations:
-   - Enable-Migrations
-   - Update-Database
+4.	Update the connection string in Web.config
+5.	Run application
+
 
 4. Features
 ----------
