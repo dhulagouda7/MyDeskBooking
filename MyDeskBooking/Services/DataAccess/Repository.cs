@@ -33,11 +33,38 @@ namespace MyDeskBooking.Services.DataAccess
             _dbSet.Add(entity);
             _context.SaveChanges();
             return Task.FromResult(entity);
-        }        public Task UpdateAsync(T entity)
+        }        
+        public Task UpdateAsync(T entity)
         {
-            _context.Entry(entity).State = System.Data.EntityState.Modified;
-            _context.SaveChanges();
-            return Task.CompletedTask;
+            try
+            {
+                // Attach the entity and mark it as modified
+                var entry = _context.Entry(entity);
+                if (entry.State == System.Data.EntityState.Detached)
+                {
+                    // If the entity is detached, attach it and mark it as modified
+                    _dbSet.Attach(entity);
+                    entry.State = System.Data.EntityState.Modified;
+                }
+
+                _context.SaveChanges();
+                return Task.CompletedTask;
+            }
+            catch (System.InvalidOperationException)
+            {
+                // If there's an existing entity being tracked, detach all entities of type T
+                foreach (var existingEntry in _context.ChangeTracker.Entries<T>())
+                {
+                    existingEntry.State = System.Data.EntityState.Detached;
+                }
+
+                // Try the update again
+                var entry = _context.Entry(entity);
+                _dbSet.Attach(entity);
+                entry.State = System.Data.EntityState.Modified;
+                _context.SaveChanges();
+                return Task.CompletedTask;
+            }
         }
 
         public async Task DeleteAsync(int id)

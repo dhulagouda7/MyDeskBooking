@@ -7,6 +7,14 @@
 <div class="container mt-4">
     <h2>Manage Floors - @(selectedBuilding?.BuildingName ?? "All Buildings")</h2>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row mt-4">
         <div class="col-md-4">
             <div class="card">
@@ -19,7 +27,7 @@
                         @Html.AntiForgeryToken()
                         <div class="mb-3">
                             <label class="form-label">Building</label>
-                            @Html.DropDownListFor(m => m.Floor.BuildingId, 
+                            @Html.DropDownListFor(m => m.Floor.BuildingId,
                                 new SelectList(Model.AvailableBuildings, "BuildingId", "BuildingName"),
                                 "Select Building", new { @class = "form-select", required = "required" })
                         </div>
@@ -41,7 +49,7 @@
                         <div>
                             @using (Html.BeginForm("Floors", "Admin", FormMethod.Get))
                             {
-                                @Html.DropDownList("buildingId", 
+                                @Html.DropDownList("buildingId",
                                     new SelectList(Model.AvailableBuildings, "BuildingId", "BuildingName", Model.Floor?.BuildingId),
                                     "All Buildings", new { @class = "form-select", onchange = "this.form.submit()" })
                             }
@@ -68,14 +76,15 @@
                                         <td>@floor.FloorNumber</td>
                                         <td>@(floor.Desks?.Count ?? 0)</td>
                                         <td>@(floor.Desks?.Count(d => d.Status == "Available" && !d.IsReserved) ?? 0)</td>
-                                        <td>                                            <div class="d-flex gap-2">
+                                        <td>
+                                            <div class="d-flex gap-2">
                                                 <button class="btn btn-sm btn-primary" onclick="editFloor(@floor.FloorId)">Edit</button>
                                                 <a href="@Url.Action("Desks", new { floorId = floor.FloorId })" class="btn btn-sm btn-info">Manage Desks</a>
                                                 @using (Html.BeginForm("DeleteFloor", "Admin", FormMethod.Post, new { style = "display: inline;" }))
                                                 {
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="floorId" value="@floor.FloorId" />
-                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                    <button type="submit" class="btn btn-sm btn-danger"
                                                             onclick="return confirm('Are you sure you want to delete this floor? This will also delete all desks on this floor.')">
                                                         Delete
                                                     </button>
@@ -130,6 +139,15 @@
 
 @section Scripts {
     <script>
+        $(document).ready(function () {
+            // Auto-close alerts after 5 seconds
+            window.setTimeout(function () {
+                $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                    $(this).remove();
+                });
+            }, 5000);
+        });
+
         function editFloor(floorId) {
             $.get('@Url.Action("GetFloor", "Admin")/' + floorId, function(data) {
                 $('#editFloorId').val(data.floorId);

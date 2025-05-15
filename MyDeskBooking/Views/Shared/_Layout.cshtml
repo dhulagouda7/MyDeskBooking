@@ -17,33 +17,36 @@
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    @if (Request.IsAuthenticated)
-                    {
-                        var roles = System.Web.Security.Roles.GetRolesForUser(User.Identity.Name);
-                        var isAdmin = roles.Contains("Admin");
+                                     <ul class="navbar-nav flex-grow-1">
+                                         @if (Request.IsAuthenticated)
+                                         {
+                                             var roles = System.Web.Security.Roles.GetRolesForUser(User.Identity.Name);
+                                             var isAdmin = roles.Contains("Admin");
 
-                        <li class="nav-item">@Html.ActionLink("Dashboard", "Index", "Dashboard", new { area = "" }, new { @class = "nav-link" })</li>
-                        <li class="nav-item">@Html.ActionLink("My Bookings", "Index", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
-                        <li class="nav-item">@Html.ActionLink("Available Desks", "Available", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
-
-                        if (isAdmin)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                                    Admin
-                                </a>
-                                <ul class="dropdown-menu">                                    
-                                    <li>@Html.ActionLink("Users", "Index", "Users", new { area = "" }, new { @class = "dropdown-item" })</li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>@Html.ActionLink("Locations", "Index", "Location", new { area = "" }, new { @class = "dropdown-item" })</li>                                    <li>@Html.ActionLink("Buildings", "Buildings", "Admin", new { area = "" }, new { @class = "dropdown-item" })</li>
-                                    <li>@Html.ActionLink("Floors", "Index", "Floor", new { area = "" }, new { @class = "dropdown-item" })</li>
-                                    <li>@Html.ActionLink("Desks", "Index", "Desk", new { area = "" }, new { @class = "dropdown-item" })</li>
-                                </ul>
-                            </li>
-                        }
-                    }
-                </ul>
+                                             <li class="nav-item">@Html.ActionLink("Dashboard", "Index", "Dashboard", new { area = "" }, new { @class = "nav-link" })</li>
+                                             <li class="nav-item">@Html.ActionLink("My Bookings", "Index", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
+                                             <li class="nav-item">@Html.ActionLink("Available Desks", "Available", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
+                                             <li class="nav-item">@Html.ActionLink("Daily Report", "Daily", "Report", new { area = "" }, new { @class = "nav-link" })</li>
+                                             if (isAdmin)
+                                             {
+                                                 <li class="nav-item dropdown">
+                                                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                                                         Admin
+                                                     </a>
+                                                     <ul class="dropdown-menu">
+                                                         <li>@Html.ActionLink("Users", "Index", "Users", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                                         <li><hr class="dropdown-divider"></li>
+                                                         <li>@Html.ActionLink("Locations", "Index", "Location", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                                         <li>@Html.ActionLink("Buildings", "Buildings", "Admin", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                                         <li>@Html.ActionLink("Floors", "Index", "Floor", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                                         <li>@Html.ActionLink("Desks", "Index", "Desk", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                                         <li><hr class="dropdown-divider"></li>
+                                                         <li style=" pointer-events: none; opacity: 0.6; cursor: not-allowed;">@Html.ActionLink("Booking Policy", "", "", new { area = "" }, new { @class = "dropdown-item" })</li>
+                                                     </ul>
+                                                 </li>
+                                             }
+                                         }
+                                     </ul>
 
                 <ul class="navbar-nav">
                     @if (Request.IsAuthenticated)
