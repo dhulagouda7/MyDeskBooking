@@ -14,7 +14,10 @@
                         <div class="d-flex gap-2">
                             <input type="date" name="date" value="@Model.ReportDate.ToString("yyyy-MM-dd")" class="form-control" />
                             <button type="submit" class="btn btn-primary">View Report</button>
-                        </div>
+                        <a href="@Url.Action("ExportDailyExcel", "Report", new { date = Model.ReportDate, isMonthly = false })" class="btn btn-success">
+                        Export to Excel
+                        </a>
+                        </div>                     
                     }
                 </div>
             </div>

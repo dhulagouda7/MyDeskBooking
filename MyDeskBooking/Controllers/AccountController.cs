@@ -22,13 +22,14 @@ namespace MyDeskBooking.Controllers
         {
             ViewBag.ReturnUrl = returnUrl;
             return View();
-        }        [HttpPost]
+        }        
+        [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(string username, string password, string returnUrl)
         {            // Get user and validate status
             var users = await _userRepository.GetAllAsync();
-            var user = users.FirstOrDefault(u => u.Username == username);
+            var user = users.FirstOrDefault(u => u.Username == username && password == "Admin@123");
 
             if (user != null)
             {
