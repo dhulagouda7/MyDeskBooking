@@ -23,13 +23,13 @@
                                              var roles = System.Web.Security.Roles.GetRolesForUser(User.Identity.Name);
                                              var isAdmin = roles.Contains("Admin");
 
-                                             <li class="nav-item">@Html.ActionLink("Dashboard", "Index", "Dashboard", new { area = "" }, new { @class = "nav-link" })</li>
-                                             <li class="nav-item">@Html.ActionLink("My Bookings", "Index", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
-                                             <li class="nav-item">@Html.ActionLink("Available Desks", "Available", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
-                                             <li class="nav-item">@Html.ActionLink("Daily Report", "Daily", "Report", new { area = "" }, new { @class = "nav-link" })</li>
+                                             <li class="nav-item nav-item-dashboard">@Html.ActionLink("Dashboard", "Index", "Dashboard", new { area = "" }, new { @class = "nav-link" })</li>
+                                             <li class="nav-item nav-item-bookings">@Html.ActionLink("My Bookings", "Index", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
+                                             <li class="nav-item nav-item-available">@Html.ActionLink("Available Desks", "Available", "Booking", new { area = "" }, new { @class = "nav-link" })</li>
+                                             <li class="nav-item nav-item-report">@Html.ActionLink("Daily Desk Utilization Report", "Daily", "Report", new { area = "" }, new { @class = "nav-link" })</li>
                                              if (isAdmin)
                                              {
-                                                 <li class="nav-item dropdown">
+                                                 <li class="nav-item dropdown nav-item-admin">
                                                      <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                                                          Admin
                                                      </a>
