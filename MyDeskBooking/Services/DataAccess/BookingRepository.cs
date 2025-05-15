@@ -35,7 +35,8 @@ namespace MyDeskBooking.Services.DataAccess
         public Task<IEnumerable<Desk>> GetAvailableDesksAsync(DateTime date, TimeSpan startTime, TimeSpan endTime)
         {
             var bookedDeskIds = _dbSet
-                .Where(b => b.BookingDate == date &&
+                .Where(b => (b.Status == "CheckedIn" || b.Status == "Pending") &&
+                           b.BookingDate == date &&
                            ((b.StartTime <= startTime && b.EndTime > startTime) ||
                             (b.StartTime < endTime && b.EndTime >= endTime) ||
                             (b.StartTime >= startTime && b.EndTime <= endTime)))
@@ -44,7 +45,7 @@ namespace MyDeskBooking.Services.DataAccess
 
             var availableDesks = _context.Desks
                 .Where(d => !bookedDeskIds.Contains(d.DeskId) && 
-                           d.Status == "Available" && 
+                           (d.Status == "Available") && 
                            !d.IsReserved)
                 .Include(d => d.Floor)
                 .Include(d => d.Floor.Building)
@@ -58,6 +59,7 @@ namespace MyDeskBooking.Services.DataAccess
         {
             var conflictingBookings = _dbSet
                 .Any(b => b.DeskId == deskId &&
+                            (b.Status == "CheckedIn" || b.Status == "Pending") &&
                               b.BookingDate == date &&
                               ((b.StartTime <= startTime && b.EndTime > startTime) ||
                                (b.StartTime < endTime && b.EndTime >= endTime) ||

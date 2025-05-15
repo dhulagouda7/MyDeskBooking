@@ -38,14 +38,7 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4"><strong>Status:</strong></div>
-                        <div class="col-sm-8">
-                            <span class="badge bg-@(Model.Status switch {
-                                "Available" => "success",
-                                "Maintenance" => "warning",
-                                "Reserved" => "info",
-                                _ => "secondary"
-                            })">@Model.Status</span>
-                        </div>
+                        <div class="col-sm-8">@Model.Status</div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4"><strong>Permanently Reserved:</strong></div>
@@ -63,7 +56,7 @@
                 </div>
             </div>
 
-            @if (ViewBag.ActiveBookings != null && ViewBag.ActiveBookings.Any())
+            @if (ViewBag.ActiveBookings != null && ((IEnumerable<MyDeskBooking.Models.EntityModels.Booking>)ViewBag.ActiveBookings).Any())
             {
                 <div class="card mt-4">
                     <div class="card-header">
@@ -87,13 +80,7 @@
                                             <td>@booking.BookingDate.ToShortDateString()</td>
                                             <td>@booking.StartTime.ToString(@"hh\:mm") - @booking.EndTime.ToString(@"hh\:mm")</td>
                                             <td>@booking.User.Username</td>
-                                            <td>
-                                                <span class="badge bg-@(booking.Status switch {
-                                                    "Pending" => "warning",
-                                                    "CheckedIn" => "success",
-                                                    _ => "secondary"
-                                                })">@booking.Status</span>
-                                            </td>
+                                            <td>@booking.Status</td>
                                         </tr>
                                     }
                                 </tbody>

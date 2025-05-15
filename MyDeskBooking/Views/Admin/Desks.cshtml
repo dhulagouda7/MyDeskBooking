@@ -7,6 +7,14 @@
 <div class="container mt-4">
     <h2>Manage Desks - Floor @(selectedFloor != null ? selectedFloor.FloorNumber.ToString() : "All"), @(selectedFloor?.Building.BuildingName ?? "All Buildings")</h2>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row mt-4">
         <div class="col-md-4">
             <div class="card">
@@ -19,10 +27,11 @@
                         @Html.AntiForgeryToken()
                         <div class="mb-3">
                             <label class="form-label">Floor</label>
-                            @Html.DropDownListFor(m => m.Desk.FloorId, 
-                                new SelectList(Model.AvailableFloors.Select(f => 
-                                    new { 
-                                        f.FloorId, 
+                            @Html.DropDownListFor(m => m.Desk.FloorId,
+                                new SelectList(Model.AvailableFloors.Select(f =>
+                                    new
+                                         {
+                                        f.FloorId,
                                         DisplayName = $"Floor {f.FloorNumber}, {f.Building.BuildingName}"
                                     }), "FloorId", "DisplayName"),
                                 "Select Floor", new { @class = "form-select", required = "required" })
@@ -98,7 +107,8 @@
                                             {
                                                 <span class="badge bg-success">No</span>
                                             }
-                                        </td>                                        <td>
+                                        </td>
+                                        <td>
                                             <div class="d-flex gap-2">
                                                 <button class="btn btn-sm btn-primary" onclick="editDesk(@desk.DeskId)">Edit</button>
                                                 <button class="btn btn-sm btn-success" onclick="changeStatus(@desk.DeskId)">Change Status</button>
@@ -106,7 +116,7 @@
                                                 {
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="deskId" value="@desk.DeskId" />
-                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                    <button type="submit" class="btn btn-sm btn-danger"
                                                             onclick="return confirm('Are you sure you want to delete this desk?')">
                                                         Delete
                                                     </button>
@@ -203,6 +213,16 @@
 
 @section Scripts {
     <script>
+
+        $(document).ready(function () {
+                // Auto-close alerts after 5 seconds
+                window.setTimeout(function () {
+                    $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                        $(this).remove();
+                    });
+                }, 5000);
+            });
+
         function editDesk(deskId) {
             $.get('@Url.Action("GetDesk", "Admin")/' + deskId, function(data) {
                 $('#editDeskId').val(data.deskId);
