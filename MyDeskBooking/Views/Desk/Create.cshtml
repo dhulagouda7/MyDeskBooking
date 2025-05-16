@@ -18,14 +18,20 @@
                     {
                         @Html.AntiForgeryToken()
                         <div class="mb-3">
-                            <label class="form-label">Building</label>
+                            <label class="form-label">Location</label>
+                            @Html.DropDownList("LocationId", ViewBag.Locations as SelectList,
+                                "-- Select Location --", new { @class = "form-select", required = "required" })
+                            @Html.ValidationMessage("LocationId", "", new { @class = "text-danger" })
+                        </div>
+                        <div class="mb-3">                            <label class="form-label">Building</label>
                             @Html.DropDownList("buildingId", (SelectList)ViewBag.Buildings, 
-                                "Select Building", new { @class = "form-select", required = "required" })
+                                "-- Select Building --", new { @class = "form-select", required = "required" })
+                            @Html.ValidationMessage("buildingId", "", new { @class = "text-danger" })
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Floor</label>
                             @Html.DropDownListFor(m => m.FloorId, (SelectList)ViewBag.Floors, 
-                                "Select Floor", new { @class = "form-select", required = "required" })
+                                "-- Select Floor --", new { @class = "form-select", required = "required" })
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Desk Number</label>
@@ -38,7 +44,8 @@
                                 new SelectList(new[] { "Available", "Maintenance", "Reserved" }),
                                 new { @class = "form-select", required = "required" })
                             @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger" })
-                        </div>                        <div class="mb-3 form-check">
+                        </div>                        
+                        <div class="mb-3 form-check">
                             @Html.CheckBoxFor(m => m.IsReserved, new { @class = "form-check-input" })
                             <label class="form-check-label">Permanently Reserved</label>
                         </div>
@@ -57,23 +64,122 @@
 </div>
 
 @section Scripts {
-    <script>
+    @Scripts.Render("~/bundles/jqueryval")    <script>
         $(document).ready(function () {
-            $('#buildingId').change(function () {
-                var buildingId = $(this).val();
-                if (buildingId) {
-                    $.get('@Url.Action("GetFloorsByBuilding")', { buildingId: buildingId }, function (data) {
-                        var floorSelect = $('#FloorId');
-                        floorSelect.empty();
-                        floorSelect.append($('<option>').text('Select Floor'));
-                        $.each(data, function (i, item) {
-                            floorSelect.append($('<option>').val(item.value).text(item.text));
-                        });
-                    });
-                } else {
-                    $('#FloorId').empty().append($('<option>').text('Select Floor'));
+            // Store initial building and floor options
+            window.buildingOptions = $('#buildingId option').clone();
+            window.floorOptions = $('#FloorId option').clone();
+            
+            // Store location data for each building
+            window.buildingOptions.each(function() {
+                var option = $(this);
+                if (option.val()) {
+                    var building = $(option.data('location-id'));
+                    option.data('location-id', building);
                 }
             });
+
+            // Store building data for each floor
+            window.floorOptions.each(function() {
+                var option = $(this);
+                if (option.val()) {
+                    var floor = $(option.data('building-id'));
+                    option.data('building-id', floor);
+                }
+            });
+            
+            // Bind change events
+            $('#LocationId').change(function() {
+                updateBuildingDropdown();
+                updateFloorDropdown();
+            });
+            
+            $('#buildingId').change(function() {
+                updateFloorDropdown();
+            });
+            
+            // Initial update if location is pre-selected
+            //updateBuildingDropdown();
+            //updateFloorDropdown();
         });
+
+        function updateBuildingDropdown() {
+            var locationId = $('#LocationId').val();
+            var buildingSelect = $('#buildingId');
+            var currentValue = buildingSelect.val();
+
+            // Clear and add default option
+            buildingSelect.empty();
+            buildingSelect.append($('<option>').val('').text('-- Select Building --'));
+
+            // Add filtered options
+            if (locationId) {
+                window.buildingOptions.each(function() {
+                    var option = $(this);
+                    if (!option.val()) return; // Skip default option
+                    var buildingLocationId = option.val();
+                    if (buildingLocationId == locationId) {
+                        buildingSelect.append(option.clone());
+                    }
+                });
+            } else {
+                // If no location is selected, show all buildings
+                window.buildingOptions.each(function() {
+                    var option = $(this);
+                    if (option.val()) {
+                        buildingSelect.append(option.clone());
+                    }
+                });
+            }
+
+            // Restore previous selection if possible
+            if (currentValue) {
+                buildingSelect.val(currentValue);
+                if (!buildingSelect.val()) {
+                    buildingSelect.val('');
+                }
+            }
+
+            // Trigger validation if form is already validated
+            if (buildingSelect.closest('form').data('validator')) {
+                buildingSelect.valid();
+            }
+        }
+
+        function updateFloorDropdown() {
+            debugger;
+            var buildingId = $('#buildingId').val();
+            var floorSelect = $('#FloorId');
+            var currentValue = floorSelect.val();
+
+            // Clear and add default option
+            floorSelect.empty();
+            floorSelect.append($('<option>').val('').text('-- Select Floor --'));
+
+            // Add filtered options
+            if (buildingId) {
+                window.floorOptions.each(function() {
+                    var option = $(this);
+                    if (!option.val()) return; // Skip default option
+                    var floorBuildingId = option.val();
+                    if (floorBuildingId == buildingId) {
+                        floorSelect.append(option.clone());
+                    }
+                });
+            }
+
+            // Restore previous selection if possible
+            if (currentValue) {
+                floorSelect.val(currentValue);
+                if (!floorSelect.val()) {
+                    floorSelect.val('');
+                }
+            }
+
+            // Trigger validation if form is already validated
+            if (floorSelect.closest('form').data('validator')) {
+                floorSelect.valid();
+            }
+        }
     </script>
 }

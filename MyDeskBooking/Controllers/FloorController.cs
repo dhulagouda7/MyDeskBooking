@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -14,20 +15,37 @@ namespace MyDeskBooking.Controllers
         private readonly IRepository<Floor> _floorRepository;
         private readonly IRepository<Building> _buildingRepository;
         private readonly IRepository<Desk> _deskRepository;
+        private readonly IRepository<Location> _locationRepository;
 
         public FloorController(
             IRepository<Floor> floorRepository,
             IRepository<Building> buildingRepository,
-            IRepository<Desk> deskRepository)
+            IRepository<Desk> deskRepository,
+            IRepository<Location> locationRepository)
         {
             _floorRepository = floorRepository;
             _buildingRepository = buildingRepository;
             _deskRepository = deskRepository;
+            _locationRepository = locationRepository;
+        }
+
+        private SelectList GetBuildingsSelectList(IEnumerable<Building> buildings, int? selectedId = null)
+        {
+            var items = buildings.Select(b => new
+            {
+                BuildingId = b.BuildingId,
+                BuildingName = b.BuildingName,
+                locationid = b.LocationId
+            });
+
+            return new SelectList(items, "BuildingId", "BuildingName", selectedId, "locationid");
         }
 
         // GET: Floor
         public async Task<ActionResult> Index(int? buildingId = null)
         {
+            if (buildingId == 0)
+                buildingId = null;
             var floors = (await _floorRepository.GetAllAsync())
                 .Where(f => !buildingId.HasValue || f.BuildingId == buildingId)
                 .OrderBy(f => f.Building.BuildingName)
@@ -50,13 +68,23 @@ namespace MyDeskBooking.Controllers
 
         // GET: Floor/Create
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> Create(int? buildingId = null)
+        public async Task<ActionResult> Create(int? locationId = null, int? buildingId = null)
         {
-            ViewBag.Buildings = new SelectList(
-                await _buildingRepository.GetAllAsync(), 
-                "BuildingId", 
-                "BuildingName",
-                buildingId);
+            var buildings = await _buildingRepository.GetAllAsync();
+            if (locationId.HasValue)
+            {
+                buildings = buildings.Where(b => b.LocationId == locationId);
+                var location = await _locationRepository.GetByIdAsync(locationId.Value);
+                ViewBag.LocationName = location?.LocationName;
+            }
+
+            ViewBag.Locations = new SelectList(
+                await _locationRepository.GetAllAsync(),
+                "LocationId",
+                "LocationName",
+                locationId);
+
+            ViewBag.Buildings = GetBuildingsSelectList(buildings, buildingId);
 
             return View(new Floor { BuildingId = buildingId ?? 0 });
         }
@@ -103,11 +131,19 @@ namespace MyDeskBooking.Controllers
                 return HttpNotFound();
             }
 
-            ViewBag.Buildings = new SelectList(
-                await _buildingRepository.GetAllAsync(), 
-                "BuildingId", 
-                "BuildingName",
-                floor.BuildingId);
+            var buildings = await _buildingRepository.GetAllAsync();
+            
+            // Get the building's location for pre-selecting
+            var building = buildings.FirstOrDefault(b => b.BuildingId == floor.BuildingId);
+            var locationId = building?.LocationId;
+
+            ViewBag.Locations = new SelectList(
+                await _locationRepository.GetAllAsync(),
+                "LocationId",
+                "LocationName",
+                locationId);
+
+            ViewBag.Buildings = GetBuildingsSelectList(buildings, floor.BuildingId);
 
             return View(floor);
         }
