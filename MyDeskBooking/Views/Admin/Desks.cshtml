@@ -5,7 +5,12 @@
 }
 
 <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Manage Desks - Floor @(selectedFloor != null ? selectedFloor.FloorNumber.ToString() : "All"), @(selectedFloor?.Building.BuildingName ?? "All Buildings")</h2>
+        <a href="@Url.Action("Floors", "Admin", new { buildingId = selectedFloor?.BuildingId })" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Floors
+        </a>
+    </div>
 
     @if (TempData["SuccessMessage"] != null)
     {

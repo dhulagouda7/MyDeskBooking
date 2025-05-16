@@ -43,26 +43,39 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4>Existing Buildings</h4>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>Existing Buildings</h4>
+                        <div class="d-flex gap-2">
+                            <input type="text" 
+                                   id="buildingSearch" 
+                                   class="form-control form-control-sm" 
+                                   placeholder="Search buildings..."
+                                   style="width: 200px;">
+                            <select id="locationFilter" class="form-select form-select-sm" style="width: 150px;">
+                                <option value="">All Locations</option>
+                                @foreach (var location in Model.AvailableLocations)
+                                {
+                                    <option value="@location.LocationName">@location.LocationName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Building Name</th>
-                                    <th>Location</th>
-                                    <th>Total Floors</th>
-                                    <th>Total Desks</th>
-                                    <th>Actions</th>
+                        <table class="table table-striped" id="buildingsTable">                            <thead>                                <tr>
+                                    <th style="width: 20%" class="text-nowrap">Building Name</th>
+                                    <th style="width: 20%" class="text-nowrap">Location</th>
+                                    <th style="width: 10%">Total Floors</th>
+                                    <th style="width: 10%">Total Desks</th>
+                                    <th style="width: 40%">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var building in Model.Buildings)
-                                {
-                                    <tr>
-                                        <td>@building.BuildingName</td>
-                                        <td>@building.Location.LocationName</td>
+                                {                                    <tr>
+                                        <td class="text-nowrap">@building.BuildingName</td>
+                                        <td class="text-nowrap">@building.Location.LocationName</td>
                                         <td>@(building.Floors?.Count ?? 0)</td>
                                         <td>@(building.Floors?.Sum(f => f.Desks?.Count ?? 0) ?? 0)</td>
                                         <td>
@@ -84,6 +97,21 @@
                                 }
                             </tbody>
                         </table>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="dataTables_info" id="paginationInfo">
+                                Showing <span id="startIndex">1</span> to <span id="endIndex">10</span> of <span id="totalItems">0</span> buildings
+                            </div>
+                            <div class="dataTables_paginate">
+                                <ul class="pagination mb-0">
+                                    <li class="page-item" id="previousPage">
+                                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                    </li>
+                                    <li class="page-item" id="nextPage">
+                                        <a class="page-link" href="#">Next</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -135,6 +163,97 @@
                     $(this).remove();
                 });
             }, 5000);
+
+            // Filter functionality
+            function filterBuildings() {
+                var searchText = $("#buildingSearch").val().toLowerCase();
+                var locationFilter = $("#locationFilter").val().toLowerCase();
+                var $rows = $("#buildingsTable tbody tr");
+                var visibleCount = 0;
+
+                $rows.each(function() {
+                    var $row = $(this);
+                    var buildingName = $row.find("td:eq(0)").text().toLowerCase();
+                    var locationName = $row.find("td:eq(1)").text().toLowerCase();
+                    
+                    var matchesSearch = buildingName.includes(searchText);
+                    var matchesLocation = !locationFilter || locationName === locationFilter;
+                    
+                    if (matchesSearch && matchesLocation) {
+                        $row.show();
+                        visibleCount++;
+                    } else {
+                        $row.hide();
+                    }
+                });
+
+                // Update pagination info
+                if (visibleCount === 0) {
+                    $("#startIndex").text("0");
+                    $("#endIndex").text("0");
+                } else {
+                    $("#startIndex").text("1");
+                    $("#endIndex").text(visibleCount);
+                }
+                $("#totalItems").text(visibleCount);
+                
+                // Update pagination buttons state
+                $("#previousPage, #nextPage").toggleClass("disabled", true);
+            }
+
+            // Bind filter events
+            $("#buildingSearch").on("keyup", filterBuildings);
+            $("#locationFilter").on("change", filterBuildings);
+
+            // Pagination variables
+            var currentPage = 1;
+            var rowsPerPage = 10;
+            var $tableBody = $("#buildingsTable tbody");
+            var $allRows = $tableBody.find("tr");
+            var totalRows = $allRows.length;
+
+            // Update pagination info initially
+            $("#totalItems").text(totalRows);
+            
+            function updatePagination() {
+                var totalPages = Math.ceil(totalRows / rowsPerPage);
+                var startIndex = (currentPage - 1) * rowsPerPage + 1;
+                var endIndex = Math.min(startIndex + rowsPerPage - 1, totalRows);
+
+                // Update info text
+                $("#startIndex").text(totalRows === 0 ? 0 : startIndex);
+                $("#endIndex").text(endIndex);
+                $("#totalItems").text(totalRows);
+
+                // Show/hide rows for current page
+                $allRows.hide();
+                $allRows.slice(startIndex - 1, endIndex).show();
+
+                // Update pagination buttons
+                $("#previousPage").toggleClass("disabled", currentPage === 1);
+                $("#nextPage").toggleClass("disabled", currentPage >= totalPages);
+            }
+
+            // Handle pagination clicks
+            $("#previousPage").click(function(e) {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    updatePagination();
+                }
+            });
+
+            $("#nextPage").click(function(e) {
+                e.preventDefault();
+                var totalPages = Math.ceil(totalRows / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updatePagination();
+                }
+            });
+
+            // Initial pagination setup
+            updatePagination();
         });
 
         function editBuilding(buildingId) {

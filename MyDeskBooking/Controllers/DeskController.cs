@@ -10,21 +10,22 @@ namespace MyDeskBooking.Controllers
 {
     [Authorize]
     public class DeskController : Controller
-    {
-        private readonly IRepository<Desk> _deskRepository;
+    {        private readonly IRepository<Desk> _deskRepository;
         private readonly IRepository<Floor> _floorRepository;
         private readonly IRepository<Building> _buildingRepository;
+        private readonly IRepository<Location> _locationRepository;
         private readonly IBookingRepository _bookingRepository;
 
         public DeskController(
             IRepository<Desk> deskRepository,
             IRepository<Floor> floorRepository,
             IRepository<Building> buildingRepository,
+            IRepository<Location> locationRepository,
             IBookingRepository bookingRepository)
-        {
-            _deskRepository = deskRepository;
+        {            _deskRepository = deskRepository;
             _floorRepository = floorRepository;
             _buildingRepository = buildingRepository;
+            _locationRepository = locationRepository;
             _bookingRepository = bookingRepository;
         }
 
@@ -67,9 +68,16 @@ namespace MyDeskBooking.Controllers
 
         // GET: Desk/Create
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> Create(int? floorId = null, int? buildingId = null)
+        public async Task<ActionResult> Create(int? floorId = null, int? buildingId = null, int? locationId = null)
         {
+            var locations = await _locationRepository.GetAllAsync();
+            ViewBag.Locations = new SelectList(locations, "LocationId", "LocationName", locationId);
+
             var buildings = await _buildingRepository.GetAllAsync();
+            if (locationId.HasValue)
+            {
+                buildings = buildings.Where(b => b.LocationId == locationId);
+            }
             ViewBag.Buildings = new SelectList(buildings, "BuildingId", "BuildingName", buildingId);
 
             var floors = await _floorRepository.GetAllAsync();
@@ -86,7 +94,7 @@ namespace MyDeskBooking.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> Create(Desk desk)
+        public async Task<ActionResult> Create(Desk desk, int? locationId = null)
         {
             if (ModelState.IsValid)
             {
@@ -105,6 +113,9 @@ namespace MyDeskBooking.Controllers
                 }
             }
 
+            var locations = await _locationRepository.GetAllAsync();
+            ViewBag.Locations = new SelectList(locations, "LocationId", "LocationName", locationId);
+
             var buildings = await _buildingRepository.GetAllAsync();
             ViewBag.Buildings = new SelectList(buildings, "BuildingId", "BuildingName");
 
@@ -115,14 +126,20 @@ namespace MyDeskBooking.Controllers
         }
 
         // GET: Desk/Edit/5
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> Edit(int id)
+        [Authorize(Roles = "Admin")]        public async Task<ActionResult> Edit(int id)
         {
             var desk = await _deskRepository.GetByIdAsync(id);
             if (desk == null)
             {
                 return HttpNotFound();
             }
+
+            var floor = await _floorRepository.GetByIdAsync(desk.FloorId);
+            var building = await _buildingRepository.GetByIdAsync(floor.BuildingId);
+            var locationId = building?.LocationId;
+
+            var locations = await _locationRepository.GetAllAsync();
+            ViewBag.Locations = new SelectList(locations, "LocationId", "LocationName", locationId);
 
             var buildings = await _buildingRepository.GetAllAsync();
             ViewBag.Buildings = new SelectList(buildings, "BuildingId", "BuildingName", desk.Floor.BuildingId);
@@ -136,8 +153,7 @@ namespace MyDeskBooking.Controllers
         // POST: Desk/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> Edit(Desk desk)
+        [Authorize(Roles = "Admin")]        public async Task<ActionResult> Edit(Desk desk, int? locationId = null)
         {
             if (ModelState.IsValid)
             {
@@ -156,6 +172,9 @@ namespace MyDeskBooking.Controllers
                     return RedirectToAction("Index", new { floorId = desk.FloorId });
                 }
             }
+
+            var locations = await _locationRepository.GetAllAsync();
+            ViewBag.Locations = new SelectList(locations, "LocationId", "LocationName", locationId);
 
             var buildings = await _buildingRepository.GetAllAsync();
             ViewBag.Buildings = new SelectList(buildings, "BuildingId", "BuildingName");

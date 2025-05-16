@@ -4,9 +4,13 @@
     var selectedBuilding = Model.AvailableBuildings.FirstOrDefault(b => b.BuildingId == Model.Floor?.BuildingId);
 }
 
-<div class="container mt-4">
-    <h2>Manage Floors - @(selectedBuilding?.BuildingName ?? "All Buildings")</h2>
-
+<div class="container mt-4">    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Manage Floors - @(selectedBuilding?.BuildingName ?? "All Buildings")</h2>
+        <a href="@Url.Action("Buildings", "Admin", new { buildingId = selectedBuilding?.BuildingId })" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Buildings
+        </a>
+    </div>
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -61,18 +65,18 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Building</th>
-                                    <th>Floor Number</th>
-                                    <th>Total Desks</th>
-                                    <th>Available Desks</th>
-                                    <th>Actions</th>
+                                    <th style="width: 20%" class="text-nowrap">Building</th>
+                                    <th style="width: 15%">Floor Number</th>
+                                    <th style="width: 15%">Total Desks</th>
+                                    <th style="width: 15%">Available Desks</th>
+                                    <th style="width: 55%">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var floor in Model.Floors)
                                 {
                                     <tr>
-                                        <td>@floor.Building.BuildingName</td>
+                                        <td class="text-nowrap">@floor.Building.BuildingName</td>
                                         <td>@floor.FloorNumber</td>
                                         <td>@(floor.Desks?.Count ?? 0)</td>
                                         <td>@(floor.Desks?.Count(d => d.Status == "Available" && !d.IsReserved) ?? 0)</td>
