@@ -102,7 +102,25 @@
                                         <td>@desk.DeskNumber</td>
                                         <td>Floor @desk.Floor.FloorNumber</td>
                                         <td>@desk.Floor.Building.BuildingName</td>
-                                        <td>@desk.Status</td>
+                                        <td> @{
+                                        string badgeClass;
+                                        switch (desk.Status)
+                                        {
+                                            case "Available":
+                                                badgeClass = "bg-success text-white";
+                                                break;
+                                            case "Maintenance":
+                                                badgeClass = "bg-warning text-dark";
+                                                break;
+                                            case "Reserved":
+                                                badgeClass = "bg-danger text-white";
+                                                break;
+                                            default:
+                                                badgeClass = "bg-secondary text-white";
+                                                break;
+                                        }
+                                    }
+                                    <span class="badge @badgeClass">@desk.Status</span></td>
                                         <td>
                                             @if (desk.IsReserved)
                                             {
